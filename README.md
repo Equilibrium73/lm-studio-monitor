@@ -235,11 +235,11 @@ Issues & pull requests are welcome — in German or English, no gatekeeping.
 - [Settings](#settings-in-the-gui)
 - [Parallelism](#important-parallelism-max-concurrent-predictions)
 - [Qwen KV dimension](#note-on-the-kv-dimension-qwen)
-- [Sliding-Window Attention](#sliding-window-attention-swa)
+- [Sliding-Window Attention](#sliding-window-attention-swa-1)
 - [KV-cache quantization](#kv-cache-quantization-full-table)
 - [Where are your GGUFs?](#customization-where-are-your-ggufs)
 - [Platform](#platform)
-- [LM Studio Community](#-lm-studio-community)
+- [LM Studio Community](#-lm-studio-community-1)
 
 </details>
 
