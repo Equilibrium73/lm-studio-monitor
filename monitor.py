@@ -42,6 +42,181 @@ from pathlib import Path
 
 import gguf_meta
 
+# ---------------------------------------------------------------------------
+# i18n - bilingual (German default / English)
+# Alle User-sichtbaren Texte laufen ueber das T()-Dictionary. Aktive Sprache
+# wird global in LANG gehalten und ist in der GUI umschaltbar.
+# ---------------------------------------------------------------------------
+LANG = "de"   # "de" oder "en"
+
+T = {
+    "de": {
+        "ram_label":        "Arbeitsspeicher (RAM)",
+        "legend_w_gpu":      "Gewichte GPU",
+        "legend_kv_gpu":     "KV-Cache GPU",
+        "legend_w_ram":      "Gewichte RAM",
+        "legend_kv_ram":     "KV-Cache RAM",
+        "legend_filemap":    "Datei-Mapping (Host)",
+        "legend_other":      "Sonstiges",
+        "legend_free":       "Frei (Sensor)",
+        "always_on_top":     "Immer im Vordergrund",
+        "vram_basis":        "VRAM-Basis (MB):",
+        "ram_basis":         "RAM-Basis (MB):",
+        "kv_quant":          "KV-Quant:",
+        "lang_label":        "Sprache:",
+        "apply":             "Anwenden",
+        "refresh":           "Jetzt aktualisieren",
+        "initializing":      "Initialisiere...",
+        "unknown_kv_cli":    "⚠ KV-Quant '{ct}' unbekannt — bitte Monitor aktualisieren",
+        "unknown_kv_log":    "Unbekannte KV-Quant aus llama-server-CLI: {ct}",
+        "error":             "Fehler: {e}",
+        "vram_unavail":      "nvidia-smi nicht verfügbar",
+        "ram_unavail":       "RAM nicht verfügbar",
+        "warn_kv_off":       "⚠ KV-Cache-Auslagerung in VRAM ist AUS (offloadKVCacheToGpu=false) → KV liegt im System-RAM!",
+        "warn_kv_missing":   "⚠ KV-Offload-Einstellung (hardware-config.json) nicht gefunden",
+        "warn_strict_cap":   "⚠ GPU-Strict-VRAM-Cap aktiv (gpuStrictVramCap=true)",
+        "warn_real_proc":    "✔ Echte Prozessmessung aktiv: {x}",
+        "sec_models":        "=== GELADENE MODELLE (LM Studio) ===",
+        "no_model":          "  (kein Modell geladen)",
+        "arch":              "Architektur",
+        "weights":           "Gewichte",
+        "context":           "Kontext",
+        "kv_theo":           "KV theoretisch",
+        "layers":            "Layer",
+        "kv_heads":          "KV-Köpfe",
+        "kv_missing":        " ⚠ GGUF nicht gefunden!",
+        "kv_calc_impossible":"    ⚠ KV-Berechnung nicht möglich (GGUF nicht gefunden).",
+        "gpu_split":         "    -> GPU: Gewichte {a} | KV {b}  [sensor-basiert]",
+        "ram_split":         "    -> RAM: Gewichte {a} | KV {b}  [sensor-basiert]",
+        "sec_sensor":        "=== SENSOR-ABGLEICH ===",
+        "other_base":        "Sonstiges+Base",
+        "free":              "Frei",
+        "sec_proc":          "=== ECHTE PROZESSMESSUNG (GPU Process Memory) ===",
+        "no_proc_data":      "  (keine Prozessdaten verfügbar)",
+        "inf_procs":         "  Inference-Prozesse erkannt: {n}",
+        "sum_llm_vram":      "    Σ LLM VRAM: {x}   [wird für die Zuordnung verwendet]",
+        "sum_llm_ram":       "    Σ LLM RAM (Priv/committed): {x}",
+        "ram_note":          "    (RAM: mmap-Datei-Basis + KV + Compute; WorkingSet unterschätzt bei --no-mmap stark)",
+        "no_inf_proc":       "    (kein llama-server/Inference-Prozess aktiv → Schätzung aus Sensordifferenz)",
+        "ui_procs":          "  LM-Studio-UI (kein Modell-VRAM, nur UI-Rendering):",
+        "other_gpu":         "  Andere GPU-Nutzer (Top 3):",
+        "sec_hw":            "=== LM-STUDIO-KONFIG (hardware-config.json) ===",
+        "hw_not_found":      "  hardware-config.json nicht gefunden",
+        "cfg_vs_reality":    "  ⚠ KONFIG vs. REALITÄT: hardware-config sagt offload={a}, aber der laufende llama-server läuft mit --{b}kv-offload → beide verrechnet. Maßgeblich ist die CLI (Realität).",
+        "kv_not_offloaded":  "  => DER KV-CACHE WIRD NICHT IN DEN VRAM AUSGELAGERT.",
+        "reason_mem_alloc":  "     Grund für 'Speicher wird nicht ideal zugewiesen'.",
+        "fix_lmstudio":      "     Fix in LM Studio: Einstellungen -> Hardware -> 'KV cache offload to GPU' aktivieren (dann hier neu laden).",
+        "kv_offload_act":    "  KV-Cache-Offload (Config): AKTIV (in VRAM).",
+        "basis_line":        "VRAM-Basis: {a} MB | RAM-Basis: {b} MB | KV-Quant: {c} ({d} B/Elem)",
+        "kv_overflow":       "⚠ KV-ÜBERLAUF (KRITISCH): >25% des KV-Cache im System-RAM! KV-BEDARF {a} → VRAM-Platz {b} → {c} im RAM",
+        "overflow_perf":     "    → Performance-Einbruch bei langem Kontext zu erwarten.",
+        "overflow_fix1":     "    → Kontext verkleinern, Parallelität senken oder ein",
+        "overflow_fix2":     "      kleineres/quantisierteres Modell wählen.",
+        "kv_ram_small":      "ℹ KV klein im RAM (marginal, unter 25% des Bedarfs): {x} — bei 96 GB RAM praktisch ohne Performance-Auswirkung.",
+        "sec_cli":           "=== ECHTE llama.cpp-PARAMETER (aus llama-server CLI) ===",
+        "offload_layers":    "    → Offload: {x} Schichten auf der GPU",
+        "moe_all_gpu":       "    → MoE-Experten: ALLE auf der GPU (separat von Attention-Layern)",
+        "moe_cpu":           "    → MoE-Experten: {x} Layer auf der CPU, Rest auf GPU",
+        "kv_lies_in":        "    → KV-Cache liegt im ",
+        "ram_deliberate":    "System-RAM (bewusst!)",
+        "status_updated":    "Aktualisiert · {n} Modell(e) geladen",
+        "kv_quant_unknown":  "Unbekannte KV-Quant '{kv_mode}' — falle auf Q4_0 zurück. Bitte Monitor aktualisieren.",
+        "seg_other_vram":    "Sonstiges (VRAM)",
+        "seg_other_ram":     "Sonstiges (RAM)",
+        "seg_free_vram":     "Frei (VRAM)",
+        "seg_free_ram":      "Frei (RAM)",
+        "seg_filemap":       "Datei-Mapping (Host-Gewichte)",
+    },
+    "en": {
+        "ram_label":        "System RAM",
+        "legend_w_gpu":      "Weights GPU",
+        "legend_kv_gpu":     "KV-Cache GPU",
+        "legend_w_ram":      "Weights RAM",
+        "legend_kv_ram":     "KV-Cache RAM",
+        "legend_filemap":    "File mapping (Host)",
+        "legend_other":      "Other",
+        "legend_free":       "Free (sensor)",
+        "always_on_top":     "Always on top",
+        "vram_basis":        "VRAM base (MB):",
+        "ram_basis":         "RAM base (MB):",
+        "kv_quant":          "KV-Quant:",
+        "lang_label":        "Language:",
+        "apply":             "Apply",
+        "refresh":           "Refresh now",
+        "initializing":      "Initializing...",
+        "unknown_kv_cli":    "⚠ Unknown KV-quant '{ct}' — please update the monitor",
+        "unknown_kv_log":    "Unknown KV-quant from llama-server CLI: {ct}",
+        "error":             "Error: {e}",
+        "vram_unavail":      "nvidia-smi not available",
+        "ram_unavail":       "RAM not available",
+        "warn_kv_off":       "⚠ KV-cache offload to VRAM is OFF (offloadKVCacheToGpu=false) → KV sits in system RAM!",
+        "warn_kv_missing":   "⚠ KV-offload setting (hardware-config.json) not found",
+        "warn_strict_cap":   "⚠ GPU strict VRAM cap active (gpuStrictVramCap=true)",
+        "warn_real_proc":    "✔ Real process measurement active: {x}",
+        "sec_models":        "=== LOADED MODELS (LM Studio) ===",
+        "no_model":          "  (no model loaded)",
+        "arch":              "Architecture",
+        "weights":           "Weights",
+        "context":           "Context",
+        "kv_theo":           "KV theoretical",
+        "layers":            "layers",
+        "kv_heads":          "KV heads",
+        "kv_missing":        " ⚠ GGUF not found!",
+        "kv_calc_impossible":"    ⚠ KV computation not possible (GGUF not found).",
+        "gpu_split":         "    -> GPU: Weights {a} | KV {b}  [sensor-based]",
+        "ram_split":         "    -> RAM: Weights {a} | KV {b}  [sensor-based]",
+        "sec_sensor":        "=== SENSOR RECONCILIATION ===",
+        "other_base":        "Other+base",
+        "free":              "Free",
+        "sec_proc":          "=== REAL PROCESS MEASUREMENT (GPU Process Memory) ===",
+        "no_proc_data":      "  (no process data available)",
+        "inf_procs":         "  Inference processes detected: {n}",
+        "sum_llm_vram":      "    Σ LLM VRAM: {x}   [used for allocation]",
+        "sum_llm_ram":       "    Σ LLM RAM (private/committed): {x}",
+        "ram_note":          "    (RAM: mmap file base + KV + compute; WorkingSet understates heavily with --no-mmap)",
+        "no_inf_proc":       "    (no llama-server/inference process active → estimate from sensor difference)",
+        "ui_procs":          "  LM Studio UI (no model VRAM, UI rendering only):",
+        "other_gpu":         "  Other GPU users (Top 3):",
+        "sec_hw":            "=== LM STUDIO CONFIG (hardware-config.json) ===",
+        "hw_not_found":      "  hardware-config.json not found",
+        "cfg_vs_reality":    "  ⚠ CONFIG vs. REALITY: hardware-config says offload={a}, but the running llama-server runs with --{b}kv-offload → the two disagree. The CLI (reality) is authoritative.",
+        "kv_not_offloaded":  "  => THE KV-CACHE IS NOT OFFLOADED TO VRAM.",
+        "reason_mem_alloc":  "     Cause of 'memory not allocated ideally'.",
+        "fix_lmstudio":      "     Fix in LM Studio: Settings -> Hardware -> enable 'KV cache offload to GPU' (then reload here).",
+        "kv_offload_act":    "  KV-cache offload (config): ACTIVE (in VRAM).",
+        "basis_line":        "VRAM base: {a} MB | RAM base: {b} MB | KV-Quant: {c} ({d} B/elem)",
+        "kv_overflow":       "⚠ KV OVERFLOW (CRITICAL): >25% of KV-cache in system RAM! KV DEMAND {a} → VRAM room {b} → {c} in RAM",
+        "overflow_perf":     "    → Performance drop expected with long context.",
+        "overflow_fix1":     "    → Reduce context, lower parallelism, or pick a",
+        "overflow_fix2":     "      smaller/more-quantized model.",
+        "kv_ram_small":      "ℹ KV small in RAM (marginal, under 25% of demand): {x} — practically no performance impact with 96 GB RAM.",
+        "sec_cli":           "=== REAL llama.cpp PARAMETERS (from llama-server CLI) ===",
+        "offload_layers":    "    → Offload: {x} layers on the GPU",
+        "moe_all_gpu":       "    → MoE experts: ALL on the GPU (separate from attention layers)",
+        "moe_cpu":           "    → MoE experts: {x} layers on the CPU, rest on GPU",
+        "kv_lies_in":        "    → KV-cache sits in ",
+        "ram_deliberate":    "system RAM (deliberately!)",
+        "status_updated":    "Updated · {n} model(s) loaded",
+        "kv_quant_unknown":  "Unknown KV-quant '{kv_mode}' — falling back to Q4_0. Please update the monitor.",
+        "seg_other_vram":    "Other (VRAM)",
+        "seg_other_ram":     "Other (RAM)",
+        "seg_free_vram":     "Free (VRAM)",
+        "seg_free_ram":      "Free (RAM)",
+        "seg_filemap":       "File mapping (host weights)",
+    },
+}
+
+
+def t(key, **kw):
+    """Uebersetzter String in der aktiven Sprache (LANG)."""
+    s = T.get(LANG, T["de"]).get(key, key)
+    if kw:
+        try:
+            s = s.format(**kw)
+        except Exception:
+            pass
+    return s
+
 # --------------------------------------------------------------------------
 # Farben (Afterburner-inspiriert, dunkles Theme)
 # --------------------------------------------------------------------------
@@ -733,10 +908,7 @@ def compute(gpu, ram, models, settings, processes=None, hw=None, ram_base=None):
     KV_EL = KV_FACTORS.get(kv_mode)
     kv_quant_warning = None
     if KV_EL is None:
-        kv_quant_warning = (
-            f"Unbekannte KV-Quant '{kv_mode}' — falle auf Q4_0 zurück. "
-            f"Bitte Monitor aktualisieren."
-        )
+        kv_quant_warning = t("kv_quant_unknown", kv_mode=kv_mode)
         kv_mode = "Q4_0"
         KV_EL = KV_FACTORS["Q4_0"]
     # RAM-Basis: wenn nicht übergeben, schätze aus Settings
@@ -928,15 +1100,15 @@ def compute(gpu, ram, models, settings, processes=None, hw=None, ram_base=None):
         if m["kv_ram"] > 0 and kv_ram_actual > 0:
             ram_segs.append((m["kv_ram"], COLOR_KV_RAM, f'{m["name"]} · KV (RAM)'))
     if host_map > 0:
-        ram_segs.append((host_map, COLOR_MAP, "Datei-Mapping (Host-Gewichte)"))
+        ram_segs.append((host_map, COLOR_MAP, t("seg_filemap")))
     if sonst_vram > 0:
-        vram_segs.append((sonst_vram, COLOR_OTHER, "Sonstiges (VRAM)"))
+        vram_segs.append((sonst_vram, COLOR_OTHER, t("seg_other_vram")))
     if sonst_ram > 0:
-        ram_segs.append((sonst_ram, COLOR_OTHER, "Sonstiges (RAM)"))
+        ram_segs.append((sonst_ram, COLOR_OTHER, t("seg_other_ram")))
     if vram_free > 0 and vram_total > 0:
-        vram_segs.append((vram_free, COLOR_FREE, "Frei (VRAM)"))
+        vram_segs.append((vram_free, COLOR_FREE, t("seg_free_vram")))
     if ram_free > 0 and ram_total > 0:
-        ram_segs.append((ram_free, COLOR_FREE, "Frei (RAM)"))
+        ram_segs.append((ram_free, COLOR_FREE, t("seg_free_ram")))
 
     return {
         "vram_total": vram_total, "vram_used": vram_used, "vram_free": vram_free,
@@ -994,10 +1166,10 @@ class App:
 
     def _build_ui(self):
         # Titel
-        t = tk.Label(self.root, text="LLM VRAM / RAM Monitor",
-                     fg=TEXT, bg=BG, font=("Segoe UI", 14, "bold"))
-        t.pack(anchor="w", padx=14, pady=(10, 2))
-        self.status = tk.Label(self.root, text="Initialisiere...",
+        self.title_lbl = tk.Label(self.root, text="LLM VRAM / RAM Monitor",
+                                  fg=TEXT, bg=BG, font=("Segoe UI", 14, "bold"))
+        self.title_lbl.pack(anchor="w", padx=14, pady=(10, 2))
+        self.status = tk.Label(self.root, text=t("initializing"),
                                fg=MUTED, bg=BG, font=("Segoe UI", 9))
         self.status.pack(anchor="w", padx=14, pady=(0, 6))
 
@@ -1021,7 +1193,7 @@ class App:
                                   bg=BG, font=("Segoe UI", 9))
         self.vram_text.pack(anchor="e", pady=(0, 6))
 
-        self.ram_label = tk.Label(self.bar_frame, text="DDR5 RAM", fg=TEXT,
+        self.ram_label = tk.Label(self.bar_frame, text=t("ram_label"), fg=TEXT,
                                   bg=BG, font=("Segoe UI", 11, "bold"))
         self.ram_label.pack(anchor="w")
         self.ram_canvas = tk.Canvas(self.bar_frame, height=34,
@@ -1031,23 +1203,26 @@ class App:
                                  bg=BG, font=("Segoe UI", 9))
         self.ram_text.pack(anchor="e", pady=(0, 6))
 
-        # Legende
+        # Legende (Labels-Referenzen speichern fuer Live-Uebersetzung)
         legend = tk.Frame(self.root, bg=BG)
         legend.pack(anchor="w", padx=14, pady=(0, 4))
-        for color, txt in [
-            (COLOR_W_VRAM, "Gewichte GPU"),
-            (COLOR_KV_VRAM, "KV-Cache GPU"),
-            (COLOR_W_RAM, "Gewichte RAM"),
-            (COLOR_KV_RAM, "KV-Cache RAM"),
-            (COLOR_MAP, "Datei-Mapping (Host)"),
-            (COLOR_OTHER, "Sonstiges"),
-            (COLOR_FREE, "Frei (Sensor)"),
+        self.legend_items = []
+        for color, key in [
+            (COLOR_W_VRAM, "legend_w_gpu"),
+            (COLOR_KV_VRAM, "legend_kv_gpu"),
+            (COLOR_W_RAM, "legend_w_ram"),
+            (COLOR_KV_RAM, "legend_kv_ram"),
+            (COLOR_MAP, "legend_filemap"),
+            (COLOR_OTHER, "legend_other"),
+            (COLOR_FREE, "legend_free"),
         ]:
             c = tk.Canvas(legend, width=14, height=14, bg=color,
                           highlightthickness=0)
             c.pack(side="left", padx=(0, 4))
-            tk.Label(legend, text=txt, fg=MUTED, bg=BG,
-                     font=("Segoe UI", 9)).pack(side="left", padx=(0, 14))
+            lbl = tk.Label(legend, text=t(key), fg=MUTED, bg=BG,
+                           font=("Segoe UI", 9))
+            lbl.pack(side="left", padx=(0, 14))
+            self.legend_items.append((lbl, key))
 
         # Detail-Breakdown
         det_frame = tk.Frame(self.root, bg=PANEL)
@@ -1061,40 +1236,76 @@ class App:
         ctrl = tk.Frame(self.root, bg=BG)
         ctrl.pack(fill="x", padx=14, pady=(4, 10))
 
-        tk.Checkbutton(ctrl, text="Immer im Vordergrund",
-                       variable=self.topmost, command=self._apply_topmost,
-                       fg=TEXT, bg=BG, selectcolor=PANEL,
-                       activebackground=BG, activeforeground=TEXT,
-                       font=("Segoe UI", 9)).pack(side="left")
+        self.cb_topmost = tk.Checkbutton(ctrl, text=t("always_on_top"),
+                                         variable=self.topmost,
+                                         command=self._apply_topmost,
+                                         fg=TEXT, bg=BG, selectcolor=PANEL,
+                                         activebackground=BG,
+                                         activeforeground=TEXT,
+                                         font=("Segoe UI", 9))
+        self.cb_topmost.pack(side="left")
 
-        tk.Label(ctrl, text="VRAM-Basis (MB):", fg=MUTED, bg=BG,
-                 font=("Segoe UI", 9)).pack(side="left", padx=(14, 2))
+        self.lbl_vbase = tk.Label(ctrl, text=t("vram_basis"), fg=MUTED, bg=BG,
+                                  font=("Segoe UI", 9))
+        self.lbl_vbase.pack(side="left", padx=(14, 2))
         self.e_base = tk.Entry(ctrl, width=7, bg=PANEL, fg=TEXT,
                                insertbackground=TEXT, relief="flat")
         self.e_base.insert(0, str(self.settings["vram_base_mb"]))
         self.e_base.pack(side="left")
 
-        tk.Label(ctrl, text="RAM-Basis (MB):", fg=MUTED, bg=BG,
-                 font=("Segoe UI", 9)).pack(side="left", padx=(12, 2))
+        self.lbl_rbase = tk.Label(ctrl, text=t("ram_basis"), fg=MUTED, bg=BG,
+                                  font=("Segoe UI", 9))
+        self.lbl_rbase.pack(side="left", padx=(12, 2))
         self.e_rbase = tk.Entry(ctrl, width=7, bg=PANEL, fg=TEXT,
                                 insertbackground=TEXT, relief="flat")
         self.e_rbase.insert(0, str(self.settings["ram_base_mb"]))
         self.e_rbase.pack(side="left")
 
-        tk.Label(ctrl, text="KV-Quant:", fg=MUTED, bg=BG,
-                 font=("Segoe UI", 9)).pack(side="left", padx=(12, 2))
+        self.lbl_kvq = tk.Label(ctrl, text=t("kv_quant"), fg=MUTED, bg=BG,
+                                font=("Segoe UI", 9))
+        self.lbl_kvq.pack(side="left", padx=(12, 2))
         self.cb_kv = ttk.Combobox(ctrl, width=6, state="readonly",
                                   values=list(KV_FACTORS.keys()),
                                   font=("Segoe UI", 9))
         self.cb_kv.set(self.settings["kv_mode"])
         self.cb_kv.pack(side="left")
 
-        tk.Button(ctrl, text="Anwenden", command=self._apply_settings,
-                  bg="#2a2f38", fg=TEXT, relief="flat",
-                  font=("Segoe UI", 9)).pack(side="left", padx=(14, 0))
-        tk.Button(ctrl, text="Jetzt aktualisieren", command=self._poll,
-                  bg="#2a2f38", fg=TEXT, relief="flat",
-                  font=("Segoe UI", 9)).pack(side="left", padx=(6, 0))
+        # Sprach-Umschalter (DE/EN)
+        self.lbl_lang = tk.Label(ctrl, text=t("lang_label"), fg=MUTED, bg=BG,
+                                 font=("Segoe UI", 9))
+        self.lbl_lang.pack(side="left", padx=(14, 2))
+        self.cb_lang = ttk.Combobox(ctrl, width=3, state="readonly",
+                                    values=["de", "en"], font=("Segoe UI", 9))
+        self.cb_lang.set(LANG)
+        self.cb_lang.bind("<<ComboboxSelected>>", self._on_lang_change)
+        self.cb_lang.pack(side="left")
+
+        self.btn_apply = tk.Button(ctrl, text=t("apply"),
+                                   command=self._apply_settings,
+                                   bg="#2a2f38", fg=TEXT, relief="flat",
+                                   font=("Segoe UI", 9))
+        self.btn_apply.pack(side="left", padx=(14, 0))
+        self.btn_refresh = tk.Button(ctrl, text=t("refresh"),
+                                     command=self._poll,
+                                     bg="#2a2f38", fg=TEXT, relief="flat",
+                                     font=("Segoe UI", 9))
+        self.btn_refresh.pack(side="left", padx=(6, 0))
+
+    def _on_lang_change(self, _evt=None):
+        global LANG
+        LANG = self.cb_lang.get()
+        # Alle statischen Widget-Texte neu setzen
+        self.ram_label.configure(text=t("ram_label"))
+        for lbl, key in self.legend_items:
+            lbl.configure(text=t(key))
+        self.cb_topmost.configure(text=t("always_on_top"))
+        self.lbl_vbase.configure(text=t("vram_basis"))
+        self.lbl_rbase.configure(text=t("ram_basis"))
+        self.lbl_kvq.configure(text=t("kv_quant"))
+        self.lbl_lang.configure(text=t("lang_label"))
+        self.btn_apply.configure(text=t("apply"))
+        self.btn_refresh.configure(text=t("refresh"))
+        self._poll()   # Detail-Panel + Status direkt neu rendern
 
     def _apply_topmost(self):
         self.root.wm_attributes("-topmost", self.topmost.get())
@@ -1157,8 +1368,8 @@ class App:
                     # Bekanntes llama.cpp-Quant, aber nicht in unserer Tabelle:
                     # nicht still ignorieren, sondern deutlich warnen.
                     self.status.configure(
-                        text=f"⚠ KV-Quant '{ct}' unbekannt — bitte Monitor aktualisieren")
-                    self._log(f"Unbekannte KV-Quant aus llama-server-CLI: {ct}")
+                        text=t("unknown_kv_cli", ct=ct))
+                    self._log(t("unknown_kv_log", ct=ct))
             # Echte Kontextgröße + Parallelität an models/settings übergeben
             if cli_parsed.get("ctx_size") and models:
                 for m in models:
@@ -1184,7 +1395,7 @@ class App:
             data = compute(gpu, ram, models, self.settings, processes=processes, hw=hw)
             self._render(gpu, ram, data, hw, processes)
         except Exception as e:
-            self.status.configure(text=f"Fehler: {e}")
+            self.status.configure(text=t("error", e=e))
         self.root.after(self.settings["interval"], self._poll)
 
     def _render(self, gpu, ram, data, hw, processes):
@@ -1195,114 +1406,108 @@ class App:
             self.vram_label.configure(
                 text=f'VRAM — {gpu["name"]}')
             self.vram_text.configure(
-                text=f'GEMESSEN (nvidia-smi): {fmt_mb(data["vram_used"])} / '
+                text=f'MEASURED (nvidia-smi): {fmt_mb(data["vram_used"])} / '
                      f'{fmt_mb(data["vram_total"])} '
-                     f'({fmt_pct(data["vram_used"], data["vram_total"])} belegt)  |  '
-                     f'frei: {fmt_mb(data["vram_free"])}')
+                     f'({fmt_pct(data["vram_used"], data["vram_total"])} used)  |  '
+                     f'free: {fmt_mb(data["vram_free"])}')
         else:
-            self.vram_text.configure(text="nvidia-smi nicht verfügbar")
+            self.vram_text.configure(text=t("vram_unavail"))
 
         if ram:
             self.ram_text.configure(
                 text=f'{fmt_mb(data["ram_used"])} / {fmt_mb(data["ram_total"])} '
-                      f'({fmt_pct(data["ram_used"], data["ram_total"])} belegt)  |  '
-                      f'frei: {fmt_mb(data["ram_free"])}')
+                      f'({fmt_pct(data["ram_used"], data["ram_total"])} used)  |  '
+                      f'free: {fmt_mb(data["ram_free"])}')
         else:
-            self.ram_text.configure(text="RAM nicht verfügbar")
+            self.ram_text.configure(text=t("ram_unavail"))
 
         # --- Warnzeile (Konfig-Diagnose) ---
         warn_parts = []
         if hw.get("found"):
             okv = hw.get("offload_kv_gpu")
             if okv is False:
-                warn_parts.append("⚠ KV-Cache-Auslagerung in VRAM ist AUS "
-                                  "(offloadKVCacheToGpu=false) → KV liegt im System-RAM!")
+                warn_parts.append(t("warn_kv_off"))
             elif okv is None:
-                warn_parts.append("⚠ KV-Offload-Einstellung (hardware-config.json) nicht gefunden")
+                warn_parts.append(t("warn_kv_missing"))
             if hw.get("strict_vram_cap") is True:
-                warn_parts.append("⚠ GPU-Strict-VRAM-Cap aktiv (gpuStrictVramCap=true)")
+                warn_parts.append(t("warn_strict_cap"))
         if data["llm_procs"]:
             llm_txt = ", ".join(f'{p["name"]}(PID {p["pid"]})' for p in data["llm_procs"])
-            warn_parts.append(f"✔ Echte Prozessmessung aktiv: {llm_txt}")
+            warn_parts.append(t("warn_real_proc", x=llm_txt))
         self.warn.configure(text="  |  ".join(warn_parts) if warn_parts else "")
 
         # --- Detail-Text ---
         lines = []
-        lines.append("=== GELADENE MODELLE (LM Studio) ===")
+        lines.append(t("sec_models"))
         if not data["models"]:
-            lines.append("  (kein Modell geladen)")
+            lines.append(t("no_model"))
         for m in data["models"]:
             ap = m["arch_params"]
             lines.append(f'\n• {m["name"]}  [{m["type"]}]')
-            lines.append(f'    Architektur  : {ap.get("architecture")}')
-            lines.append(f'    Gewichte     : {fmt_mb(m["weights"])}')
-            lines.append(f'    Kontext      : {m["context_length"]} Tokens')
+            lines.append(f'    {t("arch")}  : {ap.get("architecture")}')
+            lines.append(f'    {t("weights")}     : {fmt_mb(m["weights"])}')
+            lines.append(f'    {t("context")}      : {m["context_length"]} tokens')
             if m["type"] != "embedding":
-                missing = " ⚠ GGUF nicht gefunden!" if m.get("kv_missing") else ""
+                missing = t("kv_missing") if m.get("kv_missing") else ""
                 kv_theo = m.get("kv_theoretical", 0)
-                lines.append(f'    KV theoretisch: {fmt_mb(kv_theo)}{missing}')
-                lines.append(f'                   ({ap.get("n_layers")} Layer, '
-                             f'{ap.get("n_head_kv") if not isinstance(ap.get("n_head_kv"), list) else "var"} KV-Köpfe, '
+                lines.append(f'    {t("kv_theo")}: {fmt_mb(kv_theo)}{missing}')
+                lines.append(f'                   ({ap.get("n_layers")} {t("layers")}, '
+                             f'{ap.get("n_head_kv") if not isinstance(ap.get("n_head_kv"), list) else "var"} {t("kv_heads")}, '
                              f'head_dim {ap.get("head_dim")})')
-            lines.append(f'    -> GPU: Gewichte {fmt_mb(m["w_vram"])} '
-                         f'| KV {fmt_mb(m["kv_vram"])}  [sensor-basiert]')
-            lines.append(f'    -> RAM: Gewichte {fmt_mb(m["w_ram"])} '
-                         f'| KV {fmt_mb(m["kv_ram"])}  [sensor-basiert]')
+            lines.append(t("gpu_split", a=fmt_mb(m["w_vram"]), b=fmt_mb(m["kv_vram"])))
+            lines.append(t("ram_split", a=fmt_mb(m["w_ram"]), b=fmt_mb(m["kv_ram"])))
             if m.get("kv_missing"):
-                lines.append("    ⚠ KV-Berechnung nicht möglich (GGUF nicht gefunden).")
+                lines.append(t("kv_calc_impossible"))
 
-        lines.append("\n=== SENSOR-ABGLEICH ===")
+        lines.append("\n" + t("sec_sensor"))
         if gpu:
             lines.append(f'VRAM (nvidia-smi): {fmt_mb(data["vram_used"])} / {fmt_mb(data["vram_total"])}')
-            lines.append(f'  └─ Gewichte GPU:   {fmt_mb(sum(m["w_vram"] for m in data["models"]))}')
-            lines.append(f'  └─ KV GPU:         {fmt_mb(data["kv_vram_actual"])}')
-            lines.append(f'  └─ Sonstiges+Base: {fmt_mb(max(0,data["vram_used"]-data["kv_vram_actual"]-sum(m["w_vram"] for m in data["models"])))}')
-            lines.append(f'  └─ Frei:           {fmt_mb(data["vram_free"])}')
+            lines.append(f'  └─ Weights GPU:   {fmt_mb(sum(m["w_vram"] for m in data["models"]))}')
+            lines.append(f'  └─ KV GPU:        {fmt_mb(data["kv_vram_actual"])}')
+            lines.append(f'  └─ {t("other_base")}: {fmt_mb(max(0,data["vram_used"]-data["kv_vram_actual"]-sum(m["w_vram"] for m in data["models"])))}')
+            lines.append(f'  └─ {t("free")}:       {fmt_mb(data["vram_free"])}')
         if ram:
             lines.append(f'RAM (Windows):     {fmt_mb(data["ram_used"])} / {fmt_mb(data["ram_total"])}')
-            lines.append(f'  └─ Gewichte RAM:   {fmt_mb(sum(m["w_ram"] for m in data["models"]))}')
-            lines.append(f'  └─ KV RAM:         {fmt_mb(data["kv_ram_actual"])}')
+            lines.append(f'  └─ Weights RAM:   {fmt_mb(sum(m["w_ram"] for m in data["models"]))}')
+            lines.append(f'  └─ KV RAM:        {fmt_mb(data["kv_ram_actual"])}')
             if data.get("host_map"):
-                lines.append(f'  └─ Datei-Mapping:  {fmt_mb(data["host_map"])}')
-            lines.append(f'  └─ Sonstiges+Base: {fmt_mb(max(0,data["ram_used"]-data["kv_ram_actual"]-sum(m["w_ram"] for m in data["models"])-data.get("host_map",0)))}')
-            lines.append(f'  └─ Frei:           {fmt_mb(data["ram_free"])}')
+                lines.append(f'  └─ File mapping:  {fmt_mb(data["host_map"])}')
+            lines.append(f'  └─ {t("other_base")}: {fmt_mb(max(0,data["ram_used"]-data["kv_ram_actual"]-sum(m["w_ram"] for m in data["models"])-data.get("host_map",0)))}')
+            lines.append(f'  └─ {t("free")}:       {fmt_mb(data["ram_free"])}')
 
         # --- Echte Prozessmessung (NEU) ---
-        lines.append("\n=== ECHTE PROZESSMESSUNG (GPU Process Memory) ===")
+        lines.append("\n" + t("sec_proc"))
         if not processes:
-            lines.append("  (keine Prozessdaten verfügbar)")
+            lines.append(t("no_proc_data"))
         else:
-            lines.append(f'  Inference-Prozesse erkannt: {len(data["llm_procs"])}')
+            lines.append(t("inf_procs", n=len(data["llm_procs"])))
             if data["llm_procs"]:
                 for p in data["llm_procs"]:
                     lines.append(f'    {p["name"]} (PID {p["pid"]}): '
                                  f'VRAM {fmt_mb(p["vram"])} | RAM(WS) {fmt_mb(p["ram"])}'
                                  f' | RAM(Priv) {fmt_mb(p.get("priv", 0))}')
-                lines.append(f'    Σ LLM VRAM: {fmt_mb(data["llm_vram_meas"])}   '
-                             f'[wird für die Zuordnung verwendet]')
-                lines.append(f'    Σ LLM RAM (Priv/committed): {fmt_mb(data["llm_ram_meas"])}')
-                lines.append(f'    (RAM: mmap-Datei-Basis + KV + Compute; WorkingSet '
-                             f'unterschätzt bei --no-mmap stark)')
+                lines.append(t("sum_llm_vram", x=fmt_mb(data["llm_vram_meas"])))
+                lines.append(t("sum_llm_ram", x=fmt_mb(data["llm_ram_meas"])))
+                lines.append(t("ram_note"))
             else:
-                lines.append("    (kein llama-server/Inference-Prozess aktiv → "
-                             "Schätzung aus Sensordifferenz)")
+                lines.append(t("no_inf_proc"))
             if data["app_procs"]:
-                lines.append("  LM-Studio-UI (kein Modell-VRAM, nur UI-Rendering):")
+                lines.append(t("ui_procs"))
                 for p in data["app_procs"]:
                     lines.append(f'    {p["name"]} (PID {p["pid"]}): '
                                  f'VRAM {fmt_mb(p["vram"])} | RAM {fmt_mb(p["ram"])}')
             # Top-3 nicht-LLM GPU-Verbraucher (für Kontext: was sonst VRAM belegt)
             others = [p for p in processes if p.get("kind") not in ("inference", "app")][:3]
             if others:
-                lines.append("  Andere GPU-Nutzer (Top 3):")
+                lines.append(t("other_gpu"))
                 for p in others:
                     lines.append(f'    {p["name"]} (PID {p["pid"]}): '
                                  f'VRAM {fmt_mb(p["vram"])} | RAM {fmt_mb(p["ram"])}')
 
         # --- LM-Studio-Konfig-Diagnose (NEU) ---
-        lines.append("\n=== LM-STUDIO-KONFIG (hardware-config.json) ===")
+        lines.append("\n" + t("sec_hw"))
         if not hw.get("found"):
-            lines.append("  hardware-config.json nicht gefunden")
+            lines.append(t("hw_not_found"))
         else:
             for rk in hw.get("raw_keys", []):
                 lines.append(f"  {rk}")
@@ -1310,41 +1515,37 @@ class App:
             cli = getattr(self, "last_cli", None)
             cli_kvo = cli.get("kv_offload") if cli else None
             if cli_kvo is not None and okv is not None and bool(cli_kvo) != bool(okv):
-                lines.append("  ⚠ KONFIG vs. REALITÄT: hardware-config sagt "
-                             f"offload={okv}, aber der laufende llama-server läuft "
-                             f"mit --{'no-' if not cli_kvo else ''}kv-offload → beide "
-                             "verrechnet. Maßgeblich ist die CLI (Realität).")
+                lines.append(t("cfg_vs_reality", a=okv,
+                               b=("no-" if not cli_kvo else "")))
             if okv is False:
-                lines.append("  => DER KV-CACHE WIRD NICHT IN DEN VRAM AUSGELAGERT.")
-                lines.append("     Grund für 'Speicher wird nicht ideal zugewiesen'.")
-                lines.append("     Fix in LM Studio: Einstellungen -> Hardware ->")
-                lines.append("     'KV cache offload to GPU' aktivieren (dann hier neu laden).")
+                lines.append(t("kv_not_offloaded"))
+                lines.append(t("reason_mem_alloc"))
+                lines.append(t("fix_lmstudio"))
             elif okv is True:
-                lines.append("  KV-Cache-Offload (Config): AKTIV (in VRAM).")
+                lines.append(t("kv_offload_act"))
 
-        lines.append(f'\nVRAM-Basis: {self.settings["vram_base_mb"]} MB | '
-                     f'RAM-Basis: {self.settings["ram_base_mb"]} MB | '
-                     f'KV-Quant: {data.get("kv_mode", self.settings["kv_mode"])} '
-                     f'({KV_FACTORS.get(data.get("kv_mode", self.settings["kv_mode"]), 0):.4f} B/Elem)')
+        lines.append("\n" + t("basis_line",
+                              a=self.settings["vram_base_mb"],
+                              b=self.settings["ram_base_mb"],
+                              c=data.get("kv_mode", self.settings["kv_mode"]),
+                              d=KV_FACTORS.get(data.get("kv_mode", self.settings["kv_mode"]), 0)))
         if data.get("kv_quant_warning"):
             lines.append(f"⚠ {data['kv_quant_warning']}")
         if data.get("kv_overflow"):
-            lines.append("⚠ KV-ÜBERLAUF (KRITISCH): >25% des KV-Cache im DDR5-RAM! "
-                         f'KV-BEDARF {fmt_mb(data["kv_bedarf"])} → VRAM-Platz '
-                         f'{fmt_mb(data["kv_vram_actual"])} → '
-                         f'{fmt_mb(data["kv_ram_actual"])} im RAM')
-            lines.append("    → Performance-Einbruch bei langem Kontext zu erwarten.")
-            lines.append("    → Kontext verkleinern, Parallelität senken oder ein")
-            lines.append("      kleineres/quantisierteres Modell wählen.")
+            lines.append(t("kv_overflow",
+                           a=fmt_mb(data["kv_bedarf"]),
+                           b=fmt_mb(data["kv_vram_actual"]),
+                           c=fmt_mb(data["kv_ram_actual"])))
+            lines.append(t("overflow_perf"))
+            lines.append(t("overflow_fix1"))
+            lines.append(t("overflow_fix2"))
         elif data.get("kv_overflow_marginal"):
-            lines.append("ℹ KV klein im RAM (marginal, unter 25% des Bedarfs): "
-                         f'{fmt_mb(data["kv_ram_actual"])} — bei 96 GB RAM praktisch '
-                         f'ohne Performance-Auswirkung.')
+            lines.append(t("kv_ram_small", x=fmt_mb(data["kv_ram_actual"])))
 
         # --- Echte llama.cpp-Parameter aus Prozess-Kommandozeile ---
         cli = getattr(self, "last_cli", None)
         if cli and cli.get("ctx_size"):
-            lines.append("\n=== ECHTE llama.cpp-PARAMETER (aus llama-server CLI) ===")
+            lines.append("\n" + t("sec_cli"))
             lines.append(f'  --ctx-size     : {cli.get("ctx_size")}')
             lines.append(f'  --cache-type-k : {cli.get("cache_type_k")}')
             lines.append(f'  --cache-type-v : {cli.get("cache_type_v")}')
@@ -1361,7 +1562,7 @@ class App:
                     if isinstance(n_total, int) and n_total:
                         val = int(gpl)
                         shown = "max" if val >= n_total else f"{val}/{n_total}"
-                        lines.append(f'    → Offload: {shown} Schichten auf der GPU')
+                        lines.append(t("offload_layers", x=shown))
                 except Exception:
                     pass
             # MoE-Experten: --n-cpu-moe N = N Experten-Layer auf CPU.
@@ -1372,18 +1573,16 @@ class App:
                 lines.append(f'  --n-cpu-moe    : {cmoe}')
                 try:
                     if int(cmoe) == 0:
-                        lines.append("    → MoE-Experten: ALLE auf der GPU "
-                                     "(separat von Attention-Layern)")
+                        lines.append(t("moe_all_gpu"))
                     else:
-                        lines.append(f"    → MoE-Experten: {cmoe} Layer auf der CPU, "
-                                     "Rest auf GPU")
+                        lines.append(t("moe_cpu", x=cmoe))
                 except Exception:
                     pass
             # KV-Offload-Status + Konsequenz fürs Layout
             kvo = cli.get("kv_offload")
             if kvo is not None:
                 lines.append(f'  --kv-offload   : {kvo}')
-                lines.append("    → KV-Cache liegt im " + ("VRAM" if kvo else "DDR5-RAM (bewusst!)"))
+                lines.append(t("kv_lies_in") + ("VRAM" if kvo else t("ram_deliberate")))
             lines.append(f'  --no-mmap      : {bool(cli.get("no_mmap"))}')
             lines.append(f'  --mlock        : {bool(cli.get("mlock"))}')
 
@@ -1392,7 +1591,7 @@ class App:
         self.detail.insert("end", "\n".join(lines))
         self.detail.configure(state="disabled")
 
-        self.status.configure(text=f'Aktualisiert · {len(data["models"])} Modell(e) geladen')
+        self.status.configure(text=t("status_updated", n=len(data["models"])))
 
 
 def main():
