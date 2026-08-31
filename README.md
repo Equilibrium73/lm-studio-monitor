@@ -13,9 +13,32 @@
 *Live-Ansicht: Qwen3.8 27B geladen — Gewichte fast vollständig auf der GPU (cyan),
 KV-Cache mangels KV-Offload im System-RAM (lila). Die Warnzeile erklärt es sofort.*
 
+*Live view: Qwen3.8 27B loaded — weights almost fully on the GPU (cyan), KV-cache
+in system RAM because offload is off (purple). The warning line explains it instantly.*
+
 ---
 
-# 🇩🇪 Deutsch <a name="deutsch"></a>
+## 🇩🇪 Deutsch <a name="deutsch"></a>
+
+<details open><summary><b>Inhalt / Contents</b></summary>
+
+- [LLM VRAM / RAM Monitor](#llm-vram--ram-monitor-1)
+- [Starten](#starten)
+- [Datenquellen](#datenquellen)
+- [Echtes Messprinzip](#echtes-messprinzip-statt-reiner-schätzung)
+- [Wichtig: KV-Cache-Auslagerung](#wichtig-kv-cache-auslagerung)
+- [Einstellungen](#einstellungen-in-der-gui)
+- [Parallelität](#wichtig-parallelität-max-concurrent-predictions)
+- [KV-Dimension bei Qwen](#hinweis-zur-kv-dimension-qwen)
+- [Sliding-Window Attention](#sliding-window-attention-swa)
+- [KV-Cache-Quantisierung](#kv-cache-quantisierung-vollständige-tabelle)
+- [Wo liegen deine GGUFs?](#anpassung-wo-liegen-deine-ggufs)
+- [Plattform](#plattform--platform)
+- [LM Studio Community](#-lm-studio-community)
+
+</details>
+
+---
 
 ## LLM VRAM / RAM Monitor
 
@@ -201,6 +224,24 @@ Issues & pull requests are welcome — in German or English, no gatekeeping.
 ---
 
 # 🇬🇧 English <a name="english"></a>
+
+<details open><summary><b>Contents</b></summary>
+
+- [LLM VRAM / RAM Monitor](#llm-vram--ram-monitor-2)
+- [Getting started](#getting-started)
+- [Data sources](#data-sources)
+- [Real measurement principle](#real-measurement-principle-instead-of-pure-estimation)
+- [KV-cache offload](#important-kv-cache-offload)
+- [Settings](#settings-in-the-gui)
+- [Parallelism](#important-parallelism-max-concurrent-predictions)
+- [Qwen KV dimension](#note-on-the-kv-dimension-qwen)
+- [Sliding-Window Attention](#sliding-window-attention-swa)
+- [KV-cache quantization](#kv-cache-quantization-full-table)
+- [Where are your GGUFs?](#customization-where-are-your-ggufs)
+- [Platform](#platform)
+- [LM Studio Community](#-lm-studio-community)
+
+</details>
 
 ## LLM VRAM / RAM Monitor
 
