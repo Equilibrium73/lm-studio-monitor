@@ -159,11 +159,39 @@ Windows-Laufwerken C:…Z: ein Ordner `LLM_Models` / `llm_models` / `models` an
 der Wurzel (z.B. `D:/LLM_Models`). Liegt dein Modell-Verzeichnis woanders,
 ergänze es in `monitor.py` → `_discover_model_roots()`.
 
-## Plattform
+## Plattform / Platform
 
 Windows (nvidia-smi für NVIDIA; bei AMD/Intel automatischer herstellerneutraler
 Fallback über Registry `qwMemorySize` + GPU-Adapter-Counter). Python 3.11, nur
 Stdlib + lokales `gguf_meta.py` (keine pip-Installs nötig).
+
+Windows (nvidia-smi for NVIDIA; automatic vendor-agnostic fallback for
+AMD/Intel via Registry `qwMemorySize` + GPU adapter counters). Python 3.11,
+stdlib only + local `gguf_meta.py` (no pip installs required).
+
+---
+
+## 💬 LM Studio Community
+
+Dieses Tool ist ein Community-Projekt **für** die [LM Studio](https://lmstudio.ai)-Community —
+unabhängig, nicht offiziell, aber mit derselben Begeisterung fürs lokale Modell-Running.
+Gefällt es dir? Ein ⭐ Stern hilft anderen, es zu finden.
+
+This tool is a community project **for** the [LM Studio](https://lmstudio.ai) community —
+independent, not official, but built with the same passion for local LLMs.
+Like it? A ⭐ star helps others discover it.
+
+**Die Community trifft sich hier / Where the community hangs out:**
+
+| Ort | Link |
+|-----|------|
+| 💬 LM Studio Discord | [discord.gg/aPQfnNkxGC](https://discord.gg/aPQfnNkxGC) |
+| 📬 LM Studio Docs & Community-Hub | [lmstudio.ai/docs](https://lmstudio.ai/docs) |
+| 🤖 r/LocalLLaMA (Subreddit) | [reddit.com/r/LocalLLaMA](https://www.reddit.com/r/LocalLLaMA/) |
+| 🌐 LM Studio Community auf Hugging Face | [huggingface.co/lmstudio-community](https://huggingface.co/lmstudio-community) |
+
+Issues & Pull Requests sind willkommen — zweisprachig (DE/EN), ohne Berührungsängste.
+Issues & pull requests are welcome — in German or English, no gatekeeping.
 
 ---
 
@@ -321,3 +349,22 @@ C:…Z: a `LLM_Models` / `llm_models` / `models` folder at the root (e.g.
 Windows (nvidia-smi for NVIDIA; automatic vendor-agnostic fallback for
 AMD/Intel via Registry `qwMemorySize` + GPU adapter counters). Python 3.11,
 stdlib only + local `gguf_meta.py` (no pip installs required).
+
+---
+
+## 💬 LM Studio Community
+
+This tool is a community project **for** the [LM Studio](https://lmstudio.ai) community —
+independent, not official, but built with the same passion for local LLMs.
+Like it? A ⭐ star helps others discover it.
+
+**Where the community hangs out:**
+
+| Place | Link |
+|-------|------|
+| 💬 LM Studio Discord | [discord.gg/aPQfnNkxGC](https://discord.gg/aPQfnNkxGC) |
+| 📬 LM Studio Docs & Community Hub | [lmstudio.ai/docs](https://lmstudio.ai/docs) |
+| 🤖 r/LocalLLaMA (subreddit) | [reddit.com/r/LocalLLaMA](https://www.reddit.com/r/LocalLLaMA/) |
+| 🌐 LM Studio Community on Hugging Face | [huggingface.co/lmstudio-community](https://huggingface.co/lmstudio-community) |
+
+Issues & pull requests are welcome — in German or English, no gatekeeping.
