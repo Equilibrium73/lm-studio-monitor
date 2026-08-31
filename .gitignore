@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs / temporäre Dateien des Monitors
+*.log
+thumbs.db
+.DS_Store
+
+# Lokale Config / Secrets (falls jemand ergänzt)
+.env
+*.local.json
