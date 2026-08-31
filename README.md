@@ -8,6 +8,11 @@
 
 **Language / Sprache:** [🇩🇪 Deutsch](#deutsch) · [🇬🇧 English](#english)
 
+![LM Studio VRAM/RAM Monitor screenshot](assets/screenshot.png)
+
+*Live-Ansicht: Qwen3.8 27B geladen — Gewichte fast vollständig auf der GPU (cyan),
+KV-Cache mangels KV-Offload im System-RAM (lila). Die Warnzeile erklärt es sofort.*
+
 ---
 
 # 🇩🇪 Deutsch <a name="deutsch"></a>
